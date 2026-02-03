@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>Speedtest Dashboard</title>
+<title>Netzbremse Dashboard</title>
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <style>
   body { margin: 0; font-family: sans-serif; }
@@ -11,7 +11,7 @@
 </head>
 <body>
 
-<h2>Speedtest Dashboard</h2>
+<h2>Netzbremse Dashboard</h2>
 
 <div id="g1" class="chart"></div>
 <div id="g2" class="chart"></div>
@@ -23,6 +23,17 @@ const colors = {
   t0: "#1f77b4", t1: "#ff7f0e", t2: "#2ca02c",
   t3: "#d62728", t4: "#9467bd", t5: "#8c564b"
 };
+
+// Set here your Up- and Downstream
+// For example: I have a 600/300 Down-/Upstream.
+// It will show a green area on the graph around this Down-/Upstream
+const download = 600
+const upload = 300
+const bits_to_megabits_multiplicator = 1000 * 1000
+const download_upper_limit = download + 50
+const download_lower_limit = download - 50 
+const upload_upper_limit = upload + 50 
+const upload_lower_limit = upload - 50  
 
 fetch("/data").then(r => r.json()).then(data => render(data));
 
@@ -54,26 +65,26 @@ function render(data) {
     shapes: [
       {
         type: 'rect', xref: 'paper', x0: 0, x1: 1,
-        yref: 'y', y0: 550000000, y1: 650000000,
+        yref: 'y', y0: download_lower_limit * bits_to_megabits_multiplicator, y1: download_upper_limit * bits_to_megabits_multiplicator,
         fillcolor: 'rgba(0,255,0,0.1)',
         line: { width: 0 }
       },
       {
         type: 'rect', xref: 'paper', x0: 0, x1: 1,
-        yref: 'y', y0: 250000000, y1: 350000000,
+        yref: 'y', y0: upload_lower_limit * bits_to_megabits_multiplicator, y1: upload_upper_limit * bits_to_megabits_multiplicator,
         fillcolor: 'rgba(0,255,0,0.1)',
         line: { width: 0 }
       }
     ],
     annotations: [
       {
-        xref: 'paper', x: 0.5, y: 600000000,
+        xref: 'paper', x: 0.5, y: download * bits_to_megabits_multiplicator,
         text: 'Normbereich Download',
         showarrow: false,
         font: { color: 'green', size: 12 }
       },
       {
-        xref: 'paper', x: 0.5, y: 300000000,
+        xref: 'paper', x: 0.5, y: upload * bits_to_megabits_multiplicator,
         text: 'Normbereich Upload',
         showarrow: false,
         font: { color: 'green', size: 12 }

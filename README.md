@@ -18,6 +18,32 @@ Clone the repository and build the Container
 cd /opt/containers
 sudo git clone https://github.com/Fvbor/netzbremse-dashboard.git
 cd netzbremse-dashboard
+```
+
+Change your Down-/Upstream in `app/templates/index.html` for the green area in the graphs.
+It will take the Download and Upload, add/subtract 50 mbit and paint the green areas.
+```
+sudo nano app/templates/index.html
+or vi
+sudo vi app/templates/index.html
+```
+```
+[...]
+// Set here your Up- and Downstream
+// For example: I have a 600/300 Down-/Upstream.
+// It will show a green area on the graph around this Down-/Upstream
+const download = 600
+const upload = 300
+const bits_to_megabits_multiplicator = 1000 * 1000
+const download_upper_limit = download + 50
+const download_lower_limit = download - 50 
+const upload_upper_limit = upload + 50 
+const upload_lower_limit = upload - 50  
+[...]
+```
+
+Build the Container
+```
 sudo docker compose build
 ```
 
