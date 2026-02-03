@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Speedtest Dashboard</title>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<style>
+  body { margin: 0; font-family: sans-serif; }
+  .chart { width: 100%; height: 45vh; }
+</style>
+</head>
+<body>
+
+<h2>Speedtest Dashboard</h2>
+
+<div id="g1" class="chart"></div>
+<div id="g2" class="chart"></div>
+<div id="g3" class="chart"></div>
+<div id="g4" class="chart"></div>
+
+<script>
+const colors = {
+  t0: "#1f77b4", t1: "#ff7f0e", t2: "#2ca02c",
+  t3: "#d62728", t4: "#9467bd", t5: "#8c564b"
+};
+
+fetch("/data").then(r => r.json()).then(data => render(data));
+
+function render(data) {
+  const runs = Object.keys(data).sort();
+  const eps = Object.keys(colors);
+
+  function traces(metric, label, symbol) {
+    return eps.map(ep => ({
+      x: runs,
+      y: runs.map(r => data[r][ep]?.[metric] ?? null),
+      mode: "lines+markers",
+      connectgaps: true,
+      name: `${ep} ${label}`,
+      line: { color: colors[ep] },
+      marker: { symbol: symbol, size: 8 },
+      hovertemplate: `${ep} ${label}<br>%{x}<br>%{y}<extra></extra>`
+    }));
+  }
+
+  // Download & Upload Graph
+  const dl_ul_traces = [
+    ...traces("download", "Download", "circle"),
+    ...traces("upload", "Upload", "triangle-up")
+  ];
+
+  const dl_ul_layout = {
+    title: "Download & Upload",
+    shapes: [
+      {
+        type: 'rect', xref: 'paper', x0: 0, x1: 1,
+        yref: 'y', y0: 550000000, y1: 650000000,
+        fillcolor: 'rgba(0,255,0,0.1)',
+        line: { width: 0 }
+      },
+      {
+        type: 'rect', xref: 'paper', x0: 0, x1: 1,
+        yref: 'y', y0: 250000000, y1: 350000000,
+        fillcolor: 'rgba(0,255,0,0.1)',
+        line: { width: 0 }
+      }
+    ],
+    annotations: [
+      {
+        xref: 'paper', x: 0.5, y: 600000000,
+        text: 'Normbereich Download',
+        showarrow: false,
+        font: { color: 'green', size: 12 }
+      },
+      {
+        xref: 'paper', x: 0.5, y: 300000000,
+        text: 'Normbereich Upload',
+        showarrow: false,
+        font: { color: 'green', size: 12 }
+      }
+    ]
+  };
+
+  Plotly.newPlot("g1", dl_ul_traces, dl_ul_layout, { responsive: true });
+
+  // Andere Graphen bleiben unverändert
+  Plotly.newPlot("g2", [
+    ...traces("latency", "Latency", "square"),
+    ...traces("jitter", "Jitter", "diamond")
+  ], { title: "Latency & Jitter" }, { responsive: true });
+
+  Plotly.newPlot("g3", [
+    ...traces("downLoadedLatency", "DL Latency", "square"),
+    ...traces("upLoadedLatency", "UL Latency", "triangle-up")
+  ], { title: "Download / Upload Latency" }, { responsive: true });
+
+  Plotly.newPlot("g4", [
+    ...traces("downLoadedJitter", "DL Jitter", "diamond"),
+    ...traces("upLoadedJitter", "UL Jitter", "triangle-up")
+  ], { title: "Download / Upload Jitter" }, { responsive: true });
+}
+</script>
+
+</body>
+</html>

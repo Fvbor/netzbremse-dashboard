@@ -1,0 +1,8 @@
+services:
+  speedtest-web:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      # Set here the path to your json-results of your netzbremse container
+      - /opt/containers/netzbremse/json-results:/data:ro
